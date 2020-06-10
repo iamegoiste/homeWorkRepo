@@ -1,4 +1,3 @@
-import UIKit
 import Foundation
 
 enum Manufacture: String {
@@ -9,11 +8,17 @@ enum CarType: String{
 }
 
 enum EngineState {
-    case start, stop
+    case started, stoped
 }
 
 enum WindowsState {
-    case open, close
+    case opened, closed
+}
+
+enum CarAction {
+    case stopEngine, startEngine, openWindows, closeWindows
+    case loadFreight (volume: Int)
+    case unloadFreight (volume: Int)
 }
 
 
@@ -27,64 +32,74 @@ struct Car {
     var engineState: EngineState
     var windowsState: WindowsState
     var luggageFullness: Int
-    func drive(){
-        if self.engineState == EngineState.stop {
-            print("Двигатель не запущен, вы не можете ехать")
-        } else if self.engineState == EngineState.start{
-            print("Двигатель запущен, вы можете начать движение")
-        }
-    }
-    mutating func closeWindows(){
-        self.windowsState = .close
-        print("Окна закрыты")
-    }
-    mutating func openWindows(){
-           self.windowsState = .open
-           print("Окна открыты")
-       }
-    mutating func engineStart(){
-        self.engineState = .start
-    }
-    mutating func engineStop(){
-        self.engineState = .stop
-    }
-    mutating func luggageFullness(luggageCapacity: Int, baggage: Int){
-        if baggage == 0{
-            luggageFullness = luggageCapacity
-        } else if baggage >= 0{
-            luggageFullness = luggageCapacity - baggage
-        }
-    }
     
-    mutating func getBaggage(luggageCapacity: Int, baggage: Int ){
-        if luggageCapacity < baggage{
-            print("Места недостаточно, вы не можете загрузить багаж.")
-            self.engineState = .stop
-            print("Двигатель принудительно выключен")
-        } else if luggageCapacity >= baggage{
-            print("Места достаточно, вы можете загрузить багаж")
+    mutating func toDo(action: CarAction) {
+        switch action {
+ 
+        case .startEngine:
+            if engineState == .stoped{
+                engineState = .started
+                print("Запускаю двигатель")
+            } else {
+                print("Двигатель уже запущен")
+            }
+        case .stopEngine:
+            if engineState == .started{
+                engineState = .stoped
+                print("Выключаю двигатель")
+            } else {
+                print("Двигатель уже отключен")
+            }
+        case .openWindows:
+            if windowsState == .opened{
+                print("Окна уже открыты")
+            } else {
+                windowsState = .opened
+                print ("Открываю окна")
+            }
+        case .closeWindows:
+            if windowsState == .closed {
+                print("Окна уже закрыты")
+            } else {
+                print("Закрываю окна")
+            }
+        case .loadFreight(let volume):
+            if luggageFullness >= luggageCapacity{
+                print("Свободного места нет")
+            } else {
+                luggageFullness += volume
+                let freeSpace = luggageCapacity - luggageFullness
+                print("Загрузили \(volume) Осталось свободного места \(freeSpace)")
+            }
+        case .unloadFreight(let volume):
+            if luggageFullness == 0{
+                print("Нечего выгружать")
+            } else {
+            luggageFullness -= volume
+                print("Выгрузили \(volume) Осталось груза \(luggageFullness)")
+            }
         }
     }
 }
-var audiQ3 = Car(manufacture: .audi, carType: .suv, productionYear: 2011, luggageCapacity: 500, engineState: .start, windowsState: .open, luggageFullness: 500)
-audiQ3.getBaggage(luggageCapacity: 500, baggage: 300)
-audiQ3.luggageFullness(luggageCapacity: 500, baggage: 300)
-audiQ3.drive()
-print(audiQ3)
 
-var audiA5 = Car(manufacture: .audi, carType: .sedan, productionYear: 2020, luggageCapacity: 300, engineState: .stop, windowsState: .close, luggageFullness: 300)
-print(audiA5)
-audiA5.closeWindows()
-audiA5.getBaggage(luggageCapacity: 300, baggage: 100)
-audiA5.luggageFullness(luggageCapacity: 300, baggage: 100)
-audiA5.engineStop()
-audiA5.drive()
-print(audiA5)
+var audiQ3 = Car(manufacture: .audi, carType: .sedan, productionYear: 2020, luggageCapacity: 500, engineState: .stoped, windowsState: .closed, luggageFullness: 0)
 
-var truckMercedesBenz = Car(manufacture: .mercedesBenz, carType: .truck, productionYear: 2001, luggageCapacity: 5000, engineState: .start, windowsState: .open, luggageFullness: 5000)
-print(truckMercedesBenz)
-truckMercedesBenz.openWindows()
-truckMercedesBenz.engineStart()
-truckMercedesBenz.getBaggage(luggageCapacity: 5000, baggage: 6000)
-truckMercedesBenz.luggageFullness(luggageCapacity: 5000, baggage: 2000)
-print(truckMercedesBenz)
+audiQ3.luggageFullness
+audiQ3.toDo(action: .loadFreight(volume: 100))
+audiQ3.toDo(action: .loadFreight(volume: 400))
+audiQ3.toDo(action: .loadFreight(volume: 400))
+audiQ3.toDo(action: .unloadFreight(volume: 300))
+audiQ3.toDo(action: .unloadFreight(volume: 200))
+audiQ3.toDo(action: .unloadFreight(volume: 100))
+audiQ3.toDo(action: .closeWindows)
+print(audiQ3.windowsState)
+audiQ3.toDo(action: .startEngine)
+print(audiQ3.engineState)
+audiQ3.toDo(action: .startEngine)
+print(audiQ3.manufacture, audiQ3.carType, audiQ3.productionYear, audiQ3.luggageCapacity, audiQ3.engineState, audiQ3.windowsState, audiQ3.luggageFullness)
+
+var truckMan = Car(manufacture: .mercedesBenz, carType: .truck, productionYear: 2010, luggageCapacity: 5000, engineState: .stoped, windowsState: .closed, luggageFullness: 0)
+truckMan.toDo(action: .loadFreight(volume: 3000))
+truckMan.toDo(action: .openWindows)
+truckMan.toDo(action: .unloadFreight(volume: 1000))
+print(truckMan.manufacture, truckMan.carType, truckMan.productionYear, truckMan.luggageCapacity, truckMan.engineState, truckMan.windowsState, truckMan.luggageFullness)

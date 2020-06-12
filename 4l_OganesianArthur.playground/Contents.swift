@@ -43,7 +43,7 @@ class TruckCar: Car {
     
 }
 
-class SportCar: Car{
+class SportCar: Car {
     let lamboDoors = true
     let sportCarAction: SportCarActions
     

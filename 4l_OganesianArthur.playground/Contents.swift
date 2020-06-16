@@ -2,70 +2,116 @@ import UIKit
 
 
 enum CarAction {
-    case stopEngine, startEngine, openWindows, closeWindows, doorUnlock, doorLock
-}
-
-enum TruckActions {
-    case loadFreight, unloadFreight
-}
-
-enum SportCarActions{
-    case superSpeedOn, superSpeedOff
+    case stopEngine, startEngine, openWindows, closeWindows, enableNitro, disableNitro, loadTruck, unLoadTruck
 }
 
 class Car {
     
     let brand: String
-    let carAction: CarAction
+    let color: UIColor
+    var isEngineOn: Bool = false
+    var isWindowsOpen: Bool = false
+    var wheelCount: Int
     
-    init(brand: String, carAction: CarAction) {
+    init(brand: String, color: UIColor, wheelCount: Int) {
         self.brand = brand
-        self.carAction = carAction
+        self.color = color
+        self.wheelCount = wheelCount
     }
     
     func toDo(action: CarAction) {
-        print(action)
+        switch action {
+        case .stopEngine:
+            guard isEngineOn else {
+                print("Двигатель уже выключен")
+                return
+            }
+            isEngineOn = false
+            case .startEngine:
+            guard !isEngineOn else {
+                print("Двигатель уже включен")
+                return
+            }
+            isEngineOn = true
+            
+        case .closeWindows:
+            guard isWindowsOpen else{
+                print("Окна уже закрыты")
+                return
+            }
+            isWindowsOpen = false
+            
+        case .openWindows:
+        guard !isWindowsOpen else{
+            print("Окна уже открыты")
+            return
+        }
+            isWindowsOpen = true
+            
+        default:
+            return
+        }
     }
-    
 }
+    
 class TruckCar: Car {
-    let wheels = 6
-    let truckAction: TruckActions
+    var baggageCappacity: Int
+    var currentBaggageUsedPlace: Int = 0
     
-    init(brand: String, carAction: CarAction, truckAction: TruckActions) {
-        self.truckAction = truckAction
-        super.init(brand: brand, carAction: carAction)
+    
+    init(brand: String, color: UIColor, wheelCount: Int, capacity: Int) {
+        self.baggageCappacity = capacity
+        super.init(brand: brand, color: color, wheelCount: wheelCount)
     }
-    
-    func toDoTruck(action: TruckActions) {
-        print(action)
-    }
-    
-}
-
-class SportCar: Car {
-    let lamboDoors = true
-    let sportCarAction: SportCarActions
-    
-    init(brand: String, carAction: CarAction, sportCarAction: SportCarActions) {
-        self.sportCarAction = sportCarAction
-        super.init(brand: brand, carAction: carAction)
-    }
-        func toDoSportCar(action: SportCarActions){
-            print(action)
+        override func toDo(action: CarAction) {
+            super.toDo(action: action)
+                if action == .loadTruck {
+                    currentBaggageUsedPlace = min(currentBaggageUsedPlace + 1, baggageCappacity)
+                }
+                else if action == .unLoadTruck {
+                    currentBaggageUsedPlace = max(currentBaggageUsedPlace - 1, 0)
+                }
         }
     }
 
+    
 
-let truckCar = TruckCar(brand: "BMW", carAction: .closeWindows, truckAction: .loadFreight)
-truckCar.toDoTruck(action: .unloadFreight)
-truckCar.toDo(action: .startEngine)
-print(truckCar.brand, truckCar.truckAction, truckCar.wheels, truckCar.carAction)
+class SportCar: Car {
+    var isNitrOxygenOn: Bool = false
+    override func toDo(action: CarAction) {
+        super.toDo(action: action)
+        switch action {
+        case .disableNitro:
+            guard isNitrOxygenOn else {
+                print("Закись озота не подается")
+                return
+            }
+            isNitrOxygenOn = false
+            
+        case .enableNitro:
+            guard !isNitrOxygenOn else {
+                print("Подача закиси озота уже включена ")
+                return
+            }
+            isNitrOxygenOn = true
+            
+        default:
+            return
+        }
+    }
+}
 
-let sportCar = SportCar(brand: "Audi", carAction: .doorUnlock, sportCarAction: .superSpeedOn)
-sportCar.toDo(action: .openWindows)
-sportCar.toDoSportCar(action: .superSpeedOff)
-print(sportCar.lamboDoors, sportCar.brand, sportCar.carAction, sportCar.sportCarAction)
+var truckMan = TruckCar(brand: "Man", color: .brown, wheelCount: 8, capacity: 50)
+var sportAudi = SportCar(brand: "AUDI", color: .black, wheelCount: 4)
 
+sportAudi.toDo(action: .startEngine)
+sportAudi.toDo(action: .openWindows)
+sportAudi.toDo(action: .enableNitro)
 
+truckMan.toDo(action: .openWindows)
+truckMan.toDo(action: .unLoadTruck)
+truckMan.toDo(action: .loadTruck)
+truckMan.toDo(action: .loadTruck)
 
+print("TruckMan: в багажнике \(truckMan.currentBaggageUsedPlace) кг, окна открыты \(truckMan.isWindowsOpen), двигатель выключен \(truckMan.isEngineOn)")
+print("SportAudi: двигатель включен \(sportAudi.isEngineOn) кг, окна открыты \(sportAudi.isWindowsOpen), подача нитроксида \(sportAudi.isNitrOxygenOn)")
